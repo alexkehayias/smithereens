@@ -19,6 +19,7 @@
   [state name e]
   (let [note (:note e)
         data {:state name :velocity (:velocity e)}]
+    (println note data)
     (swap! state assoc note data)))
 
 (defn register-midi-handlers
