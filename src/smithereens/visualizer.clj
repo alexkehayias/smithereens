@@ -25,23 +25,29 @@
 (defn register-midi-handlers
   "Register midi handlers for Overtone events"
   []
-  (doseq [i [:note-on :note-off]]
-    (ovt/on-event [:midi i]
-                  #(parse-midi-notes midi-state i %)
-                  (keyword (str "midi-" i)))))
+  (doseq [note-event [:note-on :note-off]]
+    (ovt/on-event [:midi note-event]
+                  #(parse-midi-notes midi-state note-event %)
+                  (keyword (str "midi-" note-event)))))
 
 (defonce register-handlers (register-midi-handlers))
 
 (defn visualize
   "Loop through all the keys in state and visualize notes that are on"
   [midi]
-  (fill (random 100) (random 100) (random 200) (random 200))
+  ;; TODO map the color to the velocity
+  ;; TODO map the position to the note in a scale
   (doseq [k @midi]
     (let [[pos-y data] k
-          dimension (:velocity data)
-          active (= (:state data) :note-on)]
+          vel (:velocity data)
+          scaled-vel (+ 128 vel)
+          active (= (:state data) :note-off)]
+      (fill scaled-vel (* 100 0) 0 255)
       (when active
-        (rect (random dimension) (random dimension) (+ pos-y (/ (width) 2)) (+ pos-y (/ (height) 2)))))))
+        (rect (random vel)
+              (random vel)
+              (+ pos-y (/ (width) 2))
+              (+ pos-y (/ (height) 2)))))))
 
 (defn clear-frame [] (background 255))
 
